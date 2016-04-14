@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Introduction to aiohttp</title>
+
+        <meta name="description" content="The intro describes basic programming patterns for both client">
+        <meta name="author" content="Andrew Svetlov">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="lib/css/custom.css">
+
+        <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+        <script>
+            document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+              <section>
+                <h1>Introduction to aiohttp</h1>
+                <h2>Andrew Svetlov</h2>
+                <p>andrew.svetlov@gmail.com</p>
+              </section>
+              <section>
+                <h2>Bio</h2>
+                <p>
+                  <ul>
+                    <li>Use Python for more than 15 years</li>
+                    <li>Python Core Developer since 2012</li>
+                    <li><i>asyncio</i> co-author</li>
+                    <li><i>aiohttp</i> maintainer</li>
+                    <li>provide dozen libraries under <i>aio-libs</i> umbrella</li>
+                  </ul
+                </p>
+              </section>
+              <section>
+                <section>
+                  <h1>Polls</h1>
+                </section>
+                <section>
+                  <p>
+                    <ul>
+                      <li>Who use Python 3?</li>
+                      <li class="fragment">Develop WEB sites?</li>
+                      <li class="fragment">Django?</li>
+                      <li class="fragment">Flask?</li>
+                    </ul>
+                  </p>
+                </section>
+                <section>
+                  <p>
+                    <ul>
+                      <li>Who use asynchronous frameworks?</li>
+                      <li class="fragment">Twisted?</li>
+                      <li class="fragment">Tornado?</li>
+                      <li class="fragment">eventlib/gevent?</li>
+                      <li class="fragment">asyncio/aiohttp?</li>
+                    </ul>
+                  </p>
+                </section>
+              </section>
+              <section>
+                <blockquote>
+                  asyncio is another interesting topic.
+
+                  I was surprised how alive and well that little corner of the Python community is (albeit in mainly Russian speaking countries).
+                </blockquote>
+                <p>Hynek Schlawack</p>
+
+                <aside class="notes">
+                  Don't get me wrong. We are not a sect. Or, at least, we accept non Russian newcomers for free as well.
+
+                  I can describe the situation, it's easy.
+
+                  Guido started.
+
+                  Kim joined.
+
+                  I joined after that.
+
+                  Victor made all dirty work for publishing asyncio
+
+                  Selivanov made async/await syntax
+
+                  And so on.
+
+                  History if aoihttp bearing
+                </aside>
+              </section>
+              <section>
+                <section>
+                  <h2>aiohttp -- asyncio-based web</h2>
+                  <p>
+                    <ul>
+                      <li>Client API</li>
+                      <li>Server</li>
+                      <li>Persistent connections</li>
+                      <li>Websockets</li>
+                    </ul>
+                  </p>
+                </section>
+                <section>
+                  <h2>3 years long history</h2>
+                  <p>
+                    <ul>
+                      <li>Extracted from asyncio (former tulip)</li>
+                      <li>21 releases so far</li>
+                      <li>2800+ commits</li>
+                      <li>100+ contributors</li>
+                    </ul>
+                  </p>
+                </section>
+              </section>
+              <section>
+                <section>
+                  <h1>Client API</h1>
+                </section>
+                <section>
+                  <h2>Requests</h2>
+                  <pre><code>
+import requests
+
+r = requests.get('https://api.github.com/user',
+                 auth=('user', 'pass'))
+print(r.status_code)
+print(r.headers['content-type'])
+print(r.text)
+                  </code></pre>
+                </section>
+                <section>
+                  <h2>aiohttp</h2>
+                  <pre><code>
+import aiohttp
+
+async def coro():
+    r = await aiohttp.get('https://api.github.com/user',
+                          auth=aiohttp.BasicAuth('user', 'pass'))
+    print(r.status)
+    print(r.headers['content-type'])
+    print(await r.text())
+    r.close()
+                  </code></pre>
+                  <aside class="notes">
+                    Please never talk about the slide outside of the room.
+                    Shame on me.
+                  </aside>
+                </section>
+                <section>
+                  <h2>Rule of thumb for coroutines</h2>
+                  <p>
+                    <ol>
+                      <li>Call a coroutine with <b>await</b></li>
+                      <li>If a function has <b>awaits</b> -- make it coroutine</li>
+                    </ol>
+                  </p>
+                  <pre>
+                    <code>
+async def func():
+    await asyncio.sleep(1)
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Requests with session</h2>
+                  <pre><code>
+session = requests.Session()
+
+r = session.get(url)
+                  </code></pre>
+                </section>
+                <section>
+                  <h2>aiohttp with session</h2>
+                  <pre><code>
+session = aiohttp.Session()
+
+async def coro(session):
+    async with session.get(url) as r:
+        print(r.status)
+        print(await r.text())
+                  </code></pre>
+                </section>
+
+                <section>
+                  <h2>Timeouts</h2>
+                  <pre><code>
+async def coro(session):
+    with aiohttp.Timeout(1.5):
+        async with session.get(url) as r:
+            ...
+                  </code></pre>
+                </section>
+                <section>
+                  <h2>Websockets</h2>
+                  <pre>
+                    <code>
+async with client.ws_connect(
+    'http://websocket-server.org/endpoint') as ws:
+
+    async for msg in ws:
+        if msg.data == 'close':
+            await ws.close()
+            break
+        else:
+            ws.send_str("Answer on " + msg.data)
+                    </code>
+                  </pre>
+                </section>
+              </section>
+
+              <section>
+                <section>
+                  <h1>Server</h1>
+                </section>
+                <section>
+                  <h2>Trivial aiohttp</h2>
+                  <pre>
+                    <code>
+from aiohttp import web
+
+async def handler(request):
+    return web.Response(text="Hello, world")
+
+app = web.Application(loop=loop)
+app.router.add_route('GET', '/', handler)
+web.run_app(app)
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Tornado</h2>
+                  <pre>
+                    <code>
+import tornado.ioloop
+import tornado.web
+
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("Hello, world")
+
+app = tornado.web.Application([
+    (r"/", MainHandler)])
+
+app.listen(8888)
+tornado.ioloop.IOLoop.current().start()
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Database init</h2>
+                  <pre>
+                    <code>
+import sqlalchemy as sa
+from aiopg.sa import create_engine
+
+metadata = sa.MetaData()
+tbl = sa.Table('tbl', metadata,
+               sa.Column('id', sa.Integer, primary_key=True),
+               sa.Column('val', sa.String(255)))
+app['db'] = await create_engine(...)
+
+async def close_db(app):
+    app['db'].close()
+    await app['db'].wait_closed()
+app.on_cleanup.append(close_db)
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Database usage</h2>
+                  <pre>
+                    <code>
+async def handler(request):
+    txt = ""
+    async with request.app['db'].acquire() as conn:
+        await conn.execute(tbl.insert().values(val='abc'))
+
+        async for row in conn.execute(tbl.select()):
+            txt += "{}: {}\n".format(row.id, row.val)
+    return web.Response(text=txt)
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Serverside websockets</h2>
+                  <pre>
+                    <code>
+async def handler(request):
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+
+    async for msg in ws:
+        if msg.data == 'close':
+            await ws.close()
+            break
+    else:
+        ws.send_str(msg.data + '/answer')
+
+    return ws
+                    </code>
+                  </pre>
+                </section>
+              </section>
+              <section>
+                <section>
+                  <h1>Advanced techniques</h1>
+                </section>
+                <section>
+                  <h2>Request lifecicle and middlewares</h2>
+                  <img src="middleware.png"/>
+                </section>
+                <section>
+                  <h2>Server-side sessions</h2>
+                  <pre>
+                    <code>
+from aiohttp_session import get_session
+
+async def hander(request):
+    session = await get_session(request)
+    session['key'] = 'value'
+    return web.Response()
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Debug Toolbar</h2>
+                  <img src="debugtoolbar.jpg"/>
+                </section>
+              </section>
+              <section>
+                <section>
+                  <h1>tips and tricks</h1>
+                </section>
+                <section>
+                  <h2>external resource</h2>
+                  <img src="multisites.png"/>
+                  <p class="fragment">Very cheap!</p>
+                </section>
+                <section>
+                  <h2>Development cycle</h2>
+                  <p>
+                    <ul>
+                      <li>Use single process for dev environment</li>
+                      <li>Make test run easy</li>
+                      <li>Deploy separately on different
+                        processes/containers/nodes</li>
+                    </ul>
+                  </p>
+                </section>
+                <section>
+                  <h2>PYTHONASYNCIODEBUG=1</h2>
+                  <pre>
+                    <code>
+async def f():
+    fut = asyncio.Future()
+    fut.set_exception(RuntimeError())
+    del fut
+                    </code>
+                  </pre>
+                  <pre>
+                    <code>
+...
+ERROR:asyncio:Future exception was never retrieved
+future: Future finished exception=RuntimeError()
+RuntimeError
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <pre>
+                    <code class="bash">
+$ PYTHONASYNCIODEBUG=x python myapp.py
+                    </code>
+                  </pre>
+                  <pre>
+                    <code>
+ERROR:asyncio:Future exception was never retrieved
+future: Future finished exception=RuntimeError() created at filename.py:10
+source_traceback: Object created at (most recent call last):
+...
+File "filename.py", line 10, in f
+fut = asyncio.Future()
+RuntimeError
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Explicit loop</h2>
+                  <pre>
+                    <code>
+def request(method, url, *, loop=None):
+    ...
+
+loop = asyncio.get_event_loop()
+await request('GET', 'http://python.org', loop=loop)
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Testing</h2>
+                  <pre>
+                    <code>
+class Test(unittest.TestCase):
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+
+    def tearDown(self):
+        self.loop.close()
+
+    def test_func(self):
+        async def go():
+            self.assertEqual(1, await func(loop=loop))
+
+        self.loop.run_until_complete(go())
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>Performance</h2>
+                  <p>Benchmark numbers are equal to Tornado and Twisted</p>
+                  <p>Good enough for highload</p>
+                  <p>Support billions online users etc.</p>
+                </section>
+              </section>
+              <section>
+                <h1>Questions?</h1>
+                <br>
+                <h2>Andrew Svetlov</h2>
+                <p>andrew.svetlov@gmail.com</p>
+                <p>@andrew_svetlov</p>
+            </div>
+
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
+
+        <script>
+
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: true,
+                slideNumber: false,
+
+                theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+                transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+                // Parallax scrolling
+                // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+                // parallaxBackgroundSize: '2100px 900px',
+
+                // Optional libraries used to extend on reveal.js
+                dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+                ]
+            });
+
+        </script>
+
+    </body>
+</html>
