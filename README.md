@@ -2,6 +2,6 @@
 Slides for Italian PyCon 2016
 
 
-Open http://asvetlov.github.io/aiohttp-pycon-florence/
+Open http://asvetlov.github.io/aiohttp-florence/
 
 
