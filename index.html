@@ -45,11 +45,11 @@
                 <h2>Bio</h2>
                 <p>
                   <ul>
-                    <li>Use Python for more than 15 years</li>
+                    <li>Using Python for more than 15 years</li>
                     <li>Python Core Developer since 2012</li>
                     <li><i>asyncio</i> co-author</li>
                     <li><i>aiohttp</i> maintainer</li>
-                    <li>provide dozen libraries under <i>aio-libs</i> umbrella</li>
+                    <li>Providing dozen libraries under <i>aio-libs</i> umbrella</li>
                   </ul
                 </p>
               </section>
@@ -59,8 +59,10 @@
                   <p>
                     <ul>
                       <li>Who use Python 3?</li>
-                      <li class="fragment">Develop WEB sites?</li>
-                      <li class="fragment">Using async frameworks (asyncio/tornado/twisted)?</li>
+                      <li class="fragment">
+                        Develop WEB sites with classic WSGI approach?</li>
+                      <li class="fragment">
+                        Using async frameworks (asyncio/tornado/twisted)?</li>
                     </ul>
                   </p>
                 </section>
@@ -181,7 +183,7 @@ async def coro(session):
                   <pre>
                     <code>
 async with client.ws_connect(
-    'http://websocket-server.org/endpoint') as ws:
+        'http://websocket-server.org/endpoint') as ws:
 
     async for msg in ws:
         if msg.data == 'close':
@@ -221,11 +223,11 @@ urlpatterns = [
                     <code>
 from aiohttp import web
 
-async def handler(request):
+async def index(request):
     return web.Response(text="Hello, world")
 
 app = web.Application(loop=loop)
-app.router.add_route('GET', '/', handler)
+app.router.add_route('GET', '/', index)
 web.run_app(app)
                     </code>
                   </pre>
