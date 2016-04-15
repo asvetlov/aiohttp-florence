@@ -55,57 +55,23 @@
               </section>
               <section>
                 <section>
-                  <h1>Polls</h1>
-                </section>
-                <section>
+                  <h1>Poll</h1>
                   <p>
                     <ul>
                       <li>Who use Python 3?</li>
                       <li class="fragment">Develop WEB sites?</li>
-                      <li class="fragment">Django?</li>
-                      <li class="fragment">Flask?</li>
+                      <li class="fragment">Using async frameworks (asyncio/tornado/twisted)?</li>
                     </ul>
                   </p>
                 </section>
                 <section>
-                  <p>
-                    <ul>
-                      <li>Who use asynchronous frameworks?</li>
-                      <li class="fragment">Twisted?</li>
-                      <li class="fragment">Tornado?</li>
-                      <li class="fragment">eventlib/gevent?</li>
-                      <li class="fragment">asyncio/aiohttp?</li>
-                    </ul>
-                  </p>
+                  <h2>Why?</h2>
+                  <img src="multisites.png"/>
+                  <ul class="fragment">
+                    <li>1,000 OS native threads</li>
+                    <li>1,000,000 lightweight tasks</li>
+                  </ul>
                 </section>
-              </section>
-              <section>
-                <blockquote>
-                  asyncio is another interesting topic.
-
-                  I was surprised how alive and well that little corner of the Python community is (albeit in mainly Russian speaking countries).
-                </blockquote>
-                <p>Hynek Schlawack</p>
-
-                <aside class="notes">
-                  Don't get me wrong. We are not a sect. Or, at least, we accept non Russian newcomers for free as well.
-
-                  I can describe the situation, it's easy.
-
-                  Guido started.
-
-                  Kim joined.
-
-                  I joined after that.
-
-                  Victor made all dirty work for publishing asyncio
-
-                  Selivanov made async/await syntax
-
-                  And so on.
-
-                  History if aoihttp bearing
-                </aside>
               </section>
               <section>
                 <section>
@@ -169,8 +135,9 @@ async def coro():
                   <h2>Rule of thumb for coroutines</h2>
                   <p>
                     <ol>
-                      <li>Call a coroutine with <b>await</b></li>
-                      <li>If a function has <b>awaits</b> -- make it coroutine</li>
+                      <li class="fragment">Coroutine is an <b>async def</b> function</li>
+                      <li class="fragment">Call a coroutine with <b>await</b></li>
+                      <li class="fragment">If a function contains <b>awaits</b> -- make it coroutine</li>
                     </ol>
                   </p>
                   <pre>
@@ -232,7 +199,24 @@ async with client.ws_connect(
                   <h1>Server</h1>
                 </section>
                 <section>
-                  <h2>Trivial aiohttp</h2>
+                  <h2>Django</h2>
+                  <pre>
+                    <code>
+from django.conf.urls import url
+from django.http import HttpResponse
+
+
+def index(request):
+    return HttpResponse("Hello, world")
+
+urlpatterns = [
+    url(r'^$', index),
+]
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>aiohttp</h2>
                   <pre>
                     <code>
 from aiohttp import web
@@ -348,12 +332,63 @@ async def hander(request):
               </section>
               <section>
                 <section>
-                  <h1>tips and tricks</h1>
+                  <h2>asyncio under the hood</h2>
                 </section>
                 <section>
-                  <h2>external resource</h2>
-                  <img src="multisites.png"/>
-                  <p class="fragment">Very cheap!</p>
+                  <h2>Selector</h2>
+                  <p><b>EVENT_READ</b>/<b>EVENT_WRITE</b></p>
+                  <p>
+                    <ul>
+                      <li>register(fd, events, data=None)</li>
+                      <li>unregister(fd)</li>
+                      <li>select(timeout=None)</li>
+                    </ul>
+                  </p>
+                  <p class="fragment">
+                    <b><i>select, poll, epoll, kqueue</i></b>
+                  </p>
+                </section>
+                <section>
+                  <h2>Event loop</h2>
+                  <ul>
+                    <li>add_reader(fd, callback, *args)</li>
+                    <li>remove_reader(fd)</li>
+                    <li>add_writer(fd, callback, *args)</li>
+                    <li>remove_writer(fd)</li>
+                    <br/>
+                    <li>call_soon(callback, *args)</li>
+                    <li>call_later(delay, callback, *args)</li>
+                  </ul>
+                </section>
+                <section>
+                  <h2>event loop iteration</h2>
+                  <pre>
+                    <code>
+def run_forever():
+    while True:
+        events = selector.select(timeout)
+        for key, mask in events:
+            if mask & EVENT_READ:
+                key.reader(key.fileobj)
+            if mask & EVENT_WRITE:
+                key.writer(key.fileobj)
+        for timer in ready:
+            timer.run()
+                    </code>
+                  </pre>
+                </section>
+                <section>
+                  <h2>socket buffers</h2>
+                  <img src="buffers.png"/>
+                </section>
+                <section>
+                  <h2>timers</h2>
+                  <img src="timeline.png"/>
+                </section>
+              </section>
+              <section>
+                <section>
+                  <h1>tips and tricks</h1>
                 </section>
                 <section>
                   <h2>Development cycle</h2>
