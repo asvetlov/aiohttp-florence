@@ -1,7 +1,7 @@
-# aiohttp-pycon-caribbean
-Slides for Caribbean PyCon 2016
+# aiohttp-florence-2016
+Slides for Italian PyCon 2016
 
 
-Open http://asvetlov.github.io/aiohttp-pycon-caribbean/
+Open http://asvetlov.github.io/aiohttp-pycon-florence/
 
 
